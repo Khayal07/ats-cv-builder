@@ -51,4 +51,29 @@ ats-cv-builder/
 
 ## Local development
 
-Setup instructions will be added as the frontend and backend are scaffolded.
+Requirements: Node.js 22+ (24 recommended), Python 3.12.
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:3000
+npm test             # unit tests (Vitest)
+npm run lint && npm run typecheck && npm run build
+```
+
+### Backend
+
+```bash
+cd backend
+python -m venv .venv
+# Windows: .venv\Scriptsctivate   macOS/Linux: source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env
+uvicorn app.main:app --reload   # http://localhost:8000, docs at /docs
+pytest
+ruff check . && ruff format --check .
+```
+
+CI (GitHub Actions) runs the same checks on every push to `main`.
