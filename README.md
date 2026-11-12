@@ -68,7 +68,7 @@ npm run lint && npm run typecheck && npm run build
 ```bash
 cd backend
 python -m venv .venv
-# Windows: .venv\Scriptsctivate   macOS/Linux: source .venv/bin/activate
+# Windows: .venv\Scripts\activate   macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env
 uvicorn app.main:app --reload   # http://localhost:8000, docs at /docs
