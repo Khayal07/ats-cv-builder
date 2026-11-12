@@ -42,3 +42,8 @@ next-env.d.ts
 
 # allow committed env templates
 !.env.example
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
