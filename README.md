@@ -2,12 +2,18 @@
 
 Build an ATS-friendly resume, preview it live, export it as a PDF with real selectable text, and check it against a job description for keyword match, score, and suggestions.
 
-> Status: early development. See the roadmap below.
+> Status: in development. Phase 2 (guest editor + PDF export) is done; see the roadmap below.
 
-## Features (planned)
+## Features
 
-- Resume form with live preview (Summary, Experience, Education, Skills, Projects)
+Done:
+
+- Resume form with live preview (Summary, Experience, Education, Skills, Projects), add/remove/reorder entries
+- Guest mode: the resume is saved in the browser (localStorage); JSON import/export and a sample resume
 - ATS-friendly PDF export: single column, selectable text, embedded Noto fonts (supports Azerbaijani characters: ə ı ğ ş ç ö ü İ)
+
+Planned:
+
 - Three switchable ATS-safe templates (Classic, Modern, Compact)
 - Job description keyword extraction and match score with improvement suggestions (rule-based)
 - Accounts with Supabase (email/password, Google) to save and edit multiple resumes; guest mode with localStorage
@@ -59,8 +65,11 @@ Requirements: Node.js 22+ (24 recommended), Python 3.12.
 cd frontend
 npm install
 npm run dev          # http://localhost:3000
-npm test             # unit tests (Vitest)
+npm test             # unit and component tests (Vitest)
 npm run lint && npm run typecheck && npm run build
+npx playwright install chromium   # once
+npm run test:e2e     # end-to-end tests (starts a dev server on :3200)
+# or against a running app: E2E_BASE_URL=http://localhost:3000 npm run test:e2e
 ```
 
 ### Backend
@@ -77,3 +86,20 @@ ruff check . && ruff format --check .
 ```
 
 CI (GitHub Actions) runs the same checks on every push to `main`.
+
+## Deployment
+
+### Frontend on Vercel
+
+1. In Vercel, **Add New → Project** and import the GitHub repository.
+2. Set **Root Directory** to `frontend`. The framework preset is detected as Next.js; keep the default build and output settings.
+3. Set the Node.js version to 24 (Project Settings → Build and Deployment).
+4. Deploy. Every push to `main` deploys to production; pull requests get preview URLs.
+
+Environment variables (Project Settings → Environment Variables):
+
+| Variable | Needed from | Value |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Phase 3 (scoring) | URL of the Render backend, e.g. `https://ats-cv-builder-api.onrender.com` |
+
+More variables (Supabase, site URL) are added in later phases and listed here as they arrive.
