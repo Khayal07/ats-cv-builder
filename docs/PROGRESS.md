@@ -5,7 +5,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 
 ## Status
 
-- **Phase 3 (rule-based scoring), Step 4** is next.
+- **Phase 3 (rule-based scoring), Step 5** is next.
 - Phase 2, Step 8 (Vercel deploy): the docs are committed, but the deploy waits on the user connecting Vercel (see Manual TODOs).
 
 ## Done
@@ -37,7 +37,8 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 |---|---|---|
 | 3.1 | `23f2168` | `services/text.py`: NFC + i-folding match keys, tokenizer keeping `c++`/`c#`/`.net`/`node.js`/`ci/cd`, phrase segments, EN/AZ stopword lists; 31 tests |
 | 3.2 | `9f82038` | `services/keywords.py` + `POST /api/keywords`: 118-skill catalog with synonyms (`data/skills.json`), greedy longest alias match, repeated 1–3-word phrases with absorption, JD noise list (EN/AZ), weights and top 30; JD 1–20,000 chars, blank → 422 |
-| 3.3 | this commit | Pydantic `Resume` models (camelCase, lenient, size-capped), `services/matching.py`, `POST /api/score` (score, matched with sections, missing by weight); 69 backend tests |
+| 3.3 | `0774601` | Pydantic `Resume` models (camelCase, lenient, size-capped), `services/matching.py`, `POST /api/score` (score, matched with sections, missing by weight); 69 backend tests |
+| 3.4 | this commit | `services/suggestions.py` wired into `/api/score`: missing keywords (top 5), skill only in Skills, missing email, empty summary, empty Experience/Education/Skills, bullets without numbers, bullets over 30 words, JD with no keywords; sorted by severity; 80 backend tests |
 
 ## Decisions
 
@@ -73,13 +74,9 @@ None yet.
 
 ## Next
 
-Phase 3, Step 4: `feat: add improvement suggestions`. This adds `services/suggestions.py`, written test-first, with one test per rule:
-- missing high-weight keywords
-- keywords found only in Skills
-- empty summary
-- bullets without numbers
-- bullets over about 30 words
-- missing email
-- empty standard sections
-
-The suggestions are added to the `/api/score` response as `{type, severity, message}`.
+Phase 3, Step 5: `feat: add job match panel`. This is the frontend `JobMatchPanel`:
+- a job description textarea saved in the document
+- an Analyze button that calls `POST /api/score` through a typed client in `lib/api.ts` (`NEXT_PUBLIC_API_URL`)
+- the score, matched/missing keyword chips, and the suggestions list
+- loading and error states, plus a "server is waking up" message for Render cold starts
+- an E2E test with the API mocked through Playwright route interception

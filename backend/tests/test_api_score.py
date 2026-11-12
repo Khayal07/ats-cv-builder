@@ -45,6 +45,10 @@ def test_scores_a_resume_against_a_job_description():
     python = next(m for m in body["matched"] if m["term"] == "Python")
     assert python["sections"] == ["summary", "skills"]
     assert body["missing"] == [{"term": "Kubernetes", "weight": 2.0, "category": "skill"}]
+    suggestion_types = [s["type"] for s in body["suggestions"]]
+    assert "missing_keyword" in suggestion_types
+    assert "empty_section" in suggestion_types  # no education
+    assert all(set(s) == {"type", "severity", "message", "term"} for s in body["suggestions"])
 
 
 def test_accepts_a_partial_resume():

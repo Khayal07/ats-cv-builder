@@ -125,7 +125,15 @@ class MatchedKeyword(KeywordOut):
     sections: list[SectionName]
 
 
+class SuggestionOut(BaseModel):
+    type: str
+    severity: Literal["high", "medium", "low"]
+    message: str
+    term: str | None = None
+
+
 class ScoreResponse(BaseModel):
     score: int
     matched: list[MatchedKeyword]
     missing: list[KeywordOut]
+    suggestions: list[SuggestionOut]

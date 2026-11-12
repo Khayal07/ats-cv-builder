@@ -7,9 +7,11 @@ from app.models import (
     MatchedKeyword,
     ScoreRequest,
     ScoreResponse,
+    SuggestionOut,
 )
 from app.services.keywords import extract_keywords
 from app.services.matching import match_resume
+from app.services.suggestions import build_suggestions
 
 router = APIRouter(prefix="/api", tags=["scoring"])
 
@@ -25,6 +27,7 @@ def keywords(request: KeywordsRequest) -> KeywordsResponse:
 @router.post("/score", response_model=ScoreResponse)
 def score(request: ScoreRequest) -> ScoreResponse:
     result = match_resume(request.resume, extract_keywords(request.job_description))
+    suggestions = build_suggestions(request.resume, result)
     return ScoreResponse(
         score=result.score,
         matched=[
@@ -33,5 +36,9 @@ def score(request: ScoreRequest) -> ScoreResponse:
         ],
         missing=[
             KeywordOut(term=k.term, weight=k.weight, category=k.category) for k in result.missing
+        ],
+        suggestions=[
+            SuggestionOut(type=s.type, severity=s.severity, message=s.message, term=s.term)
+            for s in suggestions
         ],
     )
