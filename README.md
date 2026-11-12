@@ -2,7 +2,7 @@
 
 Build an ATS-friendly resume, preview it live, export it as a PDF with real selectable text, and check it against a job description for keyword match, score, and suggestions.
 
-> Status: in development. Phase 2 (guest editor + PDF export) is done; see the roadmap below.
+> Status: in development. Phases 1–3 (editor, PDF export, keyword scoring) are done; see [docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## Features
 
@@ -11,11 +11,11 @@ Done:
 - Resume form with live preview (Summary, Experience, Education, Skills, Projects), add/remove/reorder entries
 - Guest mode: the resume is saved in the browser (localStorage); JSON import/export and a sample resume
 - ATS-friendly PDF export: single column, selectable text, embedded Noto fonts (supports Azerbaijani characters: ə ı ğ ş ç ö ü İ)
+- Job match: paste a job description to get a keyword match score, found/missing keywords, and improvement suggestions (rule-based, English and Azerbaijani)
 
 Planned:
 
 - Three switchable ATS-safe templates (Classic, Modern, Compact)
-- Job description keyword extraction and match score with improvement suggestions (rule-based)
 - Accounts with Supabase (email/password, Google) to save and edit multiple resumes; guest mode with localStorage
 - Optional AI bullet rewriting (OpenAI), rate-limited per user, disabled gracefully without an API key
 - Optional DOCX export
@@ -64,6 +64,7 @@ Requirements: Node.js 22+ (24 recommended), Python 3.12.
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local   # NEXT_PUBLIC_API_URL, defaults to http://localhost:8000
 npm run dev          # http://localhost:3000
 npm test             # unit and component tests (Vitest)
 npm run lint && npm run typecheck && npm run build
@@ -79,7 +80,7 @@ cd backend
 python -m venv .venv
 # Windows: .venv\Scripts\activate   macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
-cp .env.example .env
+cp .env.example .env            # set ALLOWED_ORIGINS if the frontend runs on another port
 uvicorn app.main:app --reload   # http://localhost:8000, docs at /docs
 pytest
 ruff check . && ruff format --check .
@@ -103,3 +104,19 @@ Environment variables (Project Settings → Environment Variables):
 | `NEXT_PUBLIC_API_URL` | Phase 3 (scoring) | URL of the Render backend, e.g. `https://ats-cv-builder-api.onrender.com` |
 
 More variables (Supabase, site URL) are added in later phases and listed here as they arrive.
+
+### Backend on Render
+
+The repository contains a Render Blueprint (`render.yaml`) for the FastAPI service.
+
+1. In Render, choose **New → Blueprint** and select this repository. Render reads `render.yaml` and proposes the `ats-cv-builder-api` web service (free plan, root `backend`, health check `/health`).
+2. When asked for `ALLOWED_ORIGINS`, enter the Vercel production URL, e.g. `https://your-app.vercel.app`. Separate several origins with commas, and add `http://localhost:3000` only if a local frontend should call the deployed API.
+3. Deploy, then open `https://<service>.onrender.com/health`. It should return `{"status":"ok"}`.
+4. In Vercel, set `NEXT_PUBLIC_API_URL` to the Render URL and redeploy the frontend. The value is built into the bundle, so a redeploy is required.
+
+On the free plan the service sleeps after about 15 minutes idle. The first request then takes up to about a minute, and the UI shows a "server is starting up" message meanwhile.
+
+| Variable (Render) | Required | Example |
+|---|---|---|
+| `ALLOWED_ORIGINS` | yes | `https://your-app.vercel.app` |
+| `PYTHON_VERSION` | set by `render.yaml` | `3.12.10` |

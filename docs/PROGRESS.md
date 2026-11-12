@@ -5,7 +5,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 
 ## Status
 
-- **Phase 3 (rule-based scoring), Step 6 (deploy the backend to Render)** is next. It needs the user (see Manual TODOs).
+- **Phase 3 code is complete.** The Vercel and Render deploys are waiting on the user (see Manual TODOs). After that comes the production smoke test, then **Phase 4, Step 1**.
 - Phase 2, Step 8 (Vercel deploy): the docs are committed, but the deploy waits on the user connecting Vercel (see Manual TODOs).
 
 ## Done
@@ -39,7 +39,8 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 | 3.2 | `9f82038` | `services/keywords.py` + `POST /api/keywords`: 118-skill catalog with synonyms (`data/skills.json`), greedy longest alias match, repeated 1–3-word phrases with absorption, JD noise list (EN/AZ), weights and top 30; JD 1–20,000 chars, blank → 422 |
 | 3.3 | `0774601` | Pydantic `Resume` models (camelCase, lenient, size-capped), `services/matching.py`, `POST /api/score` (score, matched with sections, missing by weight); 69 backend tests |
 | 3.4 | `741f862` | `services/suggestions.py` wired into `/api/score`: missing keywords (top 5), skill only in Skills, missing email, empty summary, empty Experience/Education/Skills, bullets without numbers, bullets over 30 words, JD with no keywords; sorted by severity; 80 backend tests |
-| 3.5 | this commit | "Match a job" tab: `lib/api.ts` typed client (90 s timeout, error kinds), `JobMatchPanel` (JD saved with the resume, score meter, found/missing chips with sections, suggestions, stale-result note, "server is waking up" after 5 s), component tests and 2 E2E tests with the API mocked; verified against the real local backend |
+| 3.5 | `3cfe513` | "Match a job" tab: `lib/api.ts` typed client (90 s timeout, error kinds), `JobMatchPanel` (JD saved with the resume, score meter, found/missing chips with sections, suggestions, stale-result note, "server is waking up" after 5 s), component tests and 2 E2E tests with the API mocked; verified against the real local backend |
+| 3.6 | this commit | `render.yaml` Blueprint (free web service, root `backend`, health check `/health`, `ALLOWED_ORIGINS` prompted), README Render + Vercel env docs. The deploy itself waits on the user |
 
 ## Decisions
 
@@ -64,8 +65,8 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 | What | Phase | Status |
 |---|---|---|
 | Connect the GitHub repo to Vercel (Root Directory `frontend`, Node 24) and share the production URL | 2 | Pending |
-| Create a Render web service for `backend/` and share the URL | 3 | Not started |
-| Set `NEXT_PUBLIC_API_URL` on Vercel and `ALLOWED_ORIGINS` on Render | 3 | Not started |
+| Create the Render service from the Blueprint (`render.yaml`), enter `ALLOWED_ORIGINS` = Vercel URL, share the Render URL | 3 | Pending |
+| Set `NEXT_PUBLIC_API_URL` on Vercel to the Render URL and redeploy | 3 | Pending |
 | Create the hosted Supabase project, share the project ref, run `npx supabase login` | 5 | Not started |
 | Create the Google OAuth client and configure the Supabase Google provider and redirect URLs | 5 | Not started |
 | Add `OPENAI_API_KEY` to `backend/.env` locally and on Render | 6 | Not started |
@@ -76,4 +77,5 @@ None yet.
 
 ## Next
 
-Phase 3, Step 6: `chore: deploy backend to render`. This adds `render.yaml` (Python 3.12, `pip install -r requirements.txt`, `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, health check `/health`) and README deploy docs. The user creates the Render service and sets `ALLOWED_ORIGINS`, then sets `NEXT_PUBLIC_API_URL` on Vercel. Smoke test: production scoring with no CORS errors.
+1. When the user shares the Vercel and Render URLs: smoke test `GET /health`, then run `E2E_BASE_URL=<vercel-url> npm run test:e2e` and do a manual production "Check match" (no CORS errors). Record the results under Deployments.
+2. Then Phase 4, Step 1: `refactor: drive preview and pdf from template spec`. Classic becomes the first `TemplateSpec` and the output stays unchanged.
