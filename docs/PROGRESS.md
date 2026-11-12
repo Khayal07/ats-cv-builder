@@ -1,10 +1,11 @@
 # Progress
 
 Tracks execution of [PLAN.md](PLAN.md). Updated in the same commit as every completed step.
+A commit cannot contain its own hash: the newest row says "this commit" and gets its hash in the next step's commit.
 
 ## Status
 
-- **Phase 3 (rule-based scoring), Step 1** is next.
+- **Phase 3 (rule-based scoring), Step 2** is next.
 - Phase 2, Step 8 (Vercel deploy): the docs are committed, but the deploy waits on the user connecting Vercel (see Manual TODOs).
 
 ## Done
@@ -29,6 +30,12 @@ Tracks execution of [PLAN.md](PLAN.md). Updated in the same commit as every comp
 | 2.6 | `e90b130` | PDF export with `@react-pdf/renderer` and embedded Noto Serif/Sans |
 | 2.7 | `dbab927` | Playwright E2E for the guest flow; PDF text checked with `pdfjs-dist`; E2E added to CI |
 | 2.8 | `fc3194c` | Vercel deployment docs in README (the deploy itself is pending, see Manual TODOs) |
+| (docs) | `d4a15e7` | `docs/PLAN.md`, `docs/PROGRESS.md`, session rules in CLAUDE.md |
+
+### Phase 3: Rule-based scoring
+| Step | Commit | Summary |
+|---|---|---|
+| 3.1 | this commit | `services/text.py`: NFC + i-folding match keys, tokenizer keeping `c++`/`c#`/`.net`/`node.js`/`ci/cd`, phrase segments, EN/AZ stopword lists; 31 tests |
 
 ## Decisions
 
@@ -41,6 +48,7 @@ Tracks execution of [PLAN.md](PLAN.md). Updated in the same commit as every comp
 - **Filenames:** Azerbaijani letters are transliterated passport-style (`ə→a`, `ş→s`, …), e.g. `Aysel_Mammadova_Resume.pdf`.
 - **Storage adapter interface** (`load`/`save`): the guest editor uses localStorage now, and the Supabase adapter plugs in at Phase 5 without changing the editor.
 - **E2E target:** `E2E_BASE_URL` points Playwright at a running app (a local dev server or a deployment). Next 16 refuses a second dev server in the same folder.
+- **Matching keys fold every i variant:** the plan said "AZ-aware lowercasing (`İ→i`, `I→ı`)". Instead, keys fold `İ`, `I`, `ı` and `i` all to `i`. That needs no language detection, gives "IŞIQ" = "ışıq" = "İşıq", and keeps English "I" → "i". The cost is that `ı`/`i` minimal pairs collide, which is negligible for keyword matching. Display uses the original spelling.
 - **Known, accepted:** `npm audit` reports 7 moderate findings in dev-only ESLint tooling. Starlette suggests `httpx2` for TestClient (a deprecation warning only); the approved `httpx` stays.
 
 ## Manual TODOs
@@ -60,4 +68,4 @@ None yet.
 
 ## Next
 
-Phase 3, Step 1: `feat: add text normalization and tokenizer`. This adds `backend/app/services/text.py` with NFC normalization, Azerbaijani-aware lowercasing (`İ→i`, `I→ı`), a Unicode tokenizer that keeps `c++`, `c#`, `.net`, `node.js`, and EN/AZ stopword lists, written test-first.
+Phase 3, Step 2: `feat: add job description keyword extraction`. This adds `services/keywords.py` (1–3-gram candidates within segments, JD noise words, a curated `skills.json` with synonyms, weight = (2.0 for a skill, 1.0 otherwise) × min(freq, 3), top 30), Pydantic models, and `POST /api/keywords` with a 1–20,000 character limit, written test-first.
