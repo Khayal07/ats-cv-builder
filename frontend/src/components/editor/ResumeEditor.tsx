@@ -6,7 +6,10 @@ import { ResumePreview } from "@/components/preview/ResumePreview";
 import { siteConfig } from "@/lib/site";
 import { useEditor, type SaveState } from "@/state/ResumeProvider";
 import { BasicsForm } from "./BasicsForm";
+import { EducationForm } from "./EducationForm";
 import { ExperienceForm } from "./ExperienceForm";
+import { ProjectsForm } from "./ProjectsForm";
+import { SkillsForm } from "./SkillsForm";
 import { SummaryForm } from "./SummaryForm";
 
 const saveLabels: Record<SaveState, string> = {
@@ -50,6 +53,9 @@ export function ResumeEditor({ toolbar }: { toolbar?: ReactNode }) {
               <BasicsForm />
               <SummaryForm />
               <ExperienceForm />
+              <EducationForm />
+              <SkillsForm />
+              <ProjectsForm />
             </div>
           </div>
           <div className="px-4 py-6 sm:px-8 lg:py-0">
