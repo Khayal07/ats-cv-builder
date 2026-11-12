@@ -6,6 +6,7 @@ import { ResumePreview } from "@/components/preview/ResumePreview";
 import { siteConfig } from "@/lib/site";
 import { useEditor, type SaveState } from "@/state/ResumeProvider";
 import { BasicsForm } from "./BasicsForm";
+import { ExperienceForm } from "./ExperienceForm";
 import { SummaryForm } from "./SummaryForm";
 
 const saveLabels: Record<SaveState, string> = {
@@ -48,10 +49,11 @@ export function ResumeEditor({ toolbar }: { toolbar?: ReactNode }) {
             <div className="mx-auto flex max-w-2xl flex-col gap-8">
               <BasicsForm />
               <SummaryForm />
+              <ExperienceForm />
             </div>
           </div>
-          <div className="px-4 py-6 sm:px-8">
-            <div className="lg:sticky lg:top-20">
+          <div className="px-4 py-6 sm:px-8 lg:py-0">
+            <div className="lg:sticky lg:top-[57px] lg:max-h-[calc(100dvh-57px)] lg:overflow-y-auto lg:py-6">
               <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-soft">
                 Preview · {doc.settings.pageSize === "A4" ? "A4" : "US Letter"}
               </p>
