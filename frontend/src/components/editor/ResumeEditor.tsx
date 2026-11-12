@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { DownloadPdfButton } from "@/components/pdf/DownloadPdfButton";
 import { ResumePreview } from "@/components/preview/ResumePreview";
 import { siteConfig } from "@/lib/site";
 import { useEditor, type SaveState } from "@/state/ResumeProvider";
@@ -41,6 +42,7 @@ export function ResumeEditor({ toolbar }: { toolbar?: ReactNode }) {
         <div className="flex flex-wrap items-center gap-3">
           {status === "ready" ? <SaveIndicator state={saveState} /> : null}
           {toolbar}
+          {status === "ready" ? <DownloadPdfButton doc={doc} /> : null}
         </div>
       </header>
 
