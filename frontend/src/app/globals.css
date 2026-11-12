@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * App chrome: a cool drafting-desk surface so the white resume sheet stands out.
+ * Marker yellow is the single accent, used for focus and (later) keyword highlights.
+ */
+@theme {
+  --color-desk: #e4e8ec;
+  --color-panel: #ffffff;
+  --color-ink: #16202b;
+  --color-ink-soft: #4b5865;
+  --color-ink-faint: #8a96a2;
+  --color-rule: #cfd6dd;
+  --color-marker: #f6d743;
+  --color-marker-soft: #fcf1b3;
 }
 
+/* Font variables come from next/font classes on <html>, so they must stay inline. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-resume: var(--font-resume-face, Georgia), "Times New Roman", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: var(--color-panel);
+  color: var(--color-ink);
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The white resume sheet in the preview. Ratio follows A4 (210 × 297 mm). */
+.resume-paper {
+  width: 100%;
+  max-width: 820px;
+  /* Grows past the page ratio when content overflows (automatic minimum size). */
+  aspect-ratio: 210 / 297;
+  margin-inline: auto;
+  padding: clamp(20px, 6%, 56px);
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(22 32 43 / 0.08),
+    0 12px 32px -12px rgb(22 32 43 / 0.25);
+}
+
+::selection {
+  background: var(--color-marker-soft);
 }

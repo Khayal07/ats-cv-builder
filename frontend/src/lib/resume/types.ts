@@ -65,6 +65,24 @@ export interface Resume {
   projects: ProjectEntry[];
 }
 
+export const TEMPLATE_IDS = ["classic", "modern", "compact"] as const;
+export type TemplateId = (typeof TEMPLATE_IDS)[number];
+
+export const PAGE_SIZES = ["A4", "LETTER"] as const;
+export type PageSize = (typeof PAGE_SIZES)[number];
+
+export interface DocumentSettings {
+  template: TemplateId;
+  pageSize: PageSize;
+}
+
+/** Everything the editor persists for one resume. */
+export interface EditorDocument {
+  resume: Resume;
+  settings: DocumentSettings;
+  jobDescription: string;
+}
+
 /** Section keys that hold a list of entries. */
 export type EntrySectionKey = "experience" | "education" | "skills" | "projects";
 
