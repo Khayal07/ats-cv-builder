@@ -22,6 +22,7 @@ ATS-friendly CV builder: form, live preview, PDF export, and job-description key
 - No AI mentions in commits or PRs: no Co-Authored-By, no "generated with", no attribution of any kind.
 
 ## Working rules
+- At the start of every session, read docs/PLAN.md and docs/PROGRESS.md and continue from Next. After every completed step, update docs/PROGRESS.md in the same commit as the step. Never put secrets, keys or tokens in any file that is committed.
 - Plan first, code after approval.
 - Small steps, one commit per step, each step ends in a working state.
 - Ask before adding new dependencies.
