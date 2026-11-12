@@ -5,7 +5,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 
 ## Status
 
-- **Phase 3 (rule-based scoring), Step 5** is next.
+- **Phase 3 (rule-based scoring), Step 6 (deploy the backend to Render)** is next. It needs the user (see Manual TODOs).
 - Phase 2, Step 8 (Vercel deploy): the docs are committed, but the deploy waits on the user connecting Vercel (see Manual TODOs).
 
 ## Done
@@ -38,7 +38,8 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 | 3.1 | `23f2168` | `services/text.py`: NFC + i-folding match keys, tokenizer keeping `c++`/`c#`/`.net`/`node.js`/`ci/cd`, phrase segments, EN/AZ stopword lists; 31 tests |
 | 3.2 | `9f82038` | `services/keywords.py` + `POST /api/keywords`: 118-skill catalog with synonyms (`data/skills.json`), greedy longest alias match, repeated 1–3-word phrases with absorption, JD noise list (EN/AZ), weights and top 30; JD 1–20,000 chars, blank → 422 |
 | 3.3 | `0774601` | Pydantic `Resume` models (camelCase, lenient, size-capped), `services/matching.py`, `POST /api/score` (score, matched with sections, missing by weight); 69 backend tests |
-| 3.4 | this commit | `services/suggestions.py` wired into `/api/score`: missing keywords (top 5), skill only in Skills, missing email, empty summary, empty Experience/Education/Skills, bullets without numbers, bullets over 30 words, JD with no keywords; sorted by severity; 80 backend tests |
+| 3.4 | `741f862` | `services/suggestions.py` wired into `/api/score`: missing keywords (top 5), skill only in Skills, missing email, empty summary, empty Experience/Education/Skills, bullets without numbers, bullets over 30 words, JD with no keywords; sorted by severity; 80 backend tests |
+| 3.5 | this commit | "Match a job" tab: `lib/api.ts` typed client (90 s timeout, error kinds), `JobMatchPanel` (JD saved with the resume, score meter, found/missing chips with sections, suggestions, stale-result note, "server is waking up" after 5 s), component tests and 2 E2E tests with the API mocked; verified against the real local backend |
 
 ## Decisions
 
@@ -55,6 +56,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 - **Ambiguous skill names:** catalog entries can set `match_name: false`, so a skill whose name is also a common English word is only found through its unambiguous aliases (Go → `golang`, Express → `express.js`, Excel → `microsoft excel`/`advanced excel`).
 - **Phrase keywords need a repeat:** a non-skill phrase needs at least 2 occurrences, and generic JD verbs/nouns are in `data/jd_noise.txt`. This keeps one-off words like "design" or "build" out of the score. At equal weight, skills rank above phrases.
 - **Matching details:** keyword variants are matched as token sequences inside phrase segments of each section. The headline counts as Summary. A light plural fold (strip a trailing `s` from words longer than 3 letters, not `ss`) is applied to both sides so "pipelines" matches "pipeline". Score = round(100 × matched weight / total weight); a JD with no keywords scores 0.
+- **Job match placement:** "Match a job" is a tab next to "Resume" in the left column, so the preview stays visible. Both panels stay mounted, so results survive switching tabs. A full mobile tab layout comes in Phase 7.
 - **Known, accepted:** `npm audit` reports 7 moderate findings in dev-only ESLint tooling. Starlette suggests `httpx2` for TestClient (a deprecation warning only); the approved `httpx` stays.
 
 ## Manual TODOs
@@ -74,9 +76,4 @@ None yet.
 
 ## Next
 
-Phase 3, Step 5: `feat: add job match panel`. This is the frontend `JobMatchPanel`:
-- a job description textarea saved in the document
-- an Analyze button that calls `POST /api/score` through a typed client in `lib/api.ts` (`NEXT_PUBLIC_API_URL`)
-- the score, matched/missing keyword chips, and the suggestions list
-- loading and error states, plus a "server is waking up" message for Render cold starts
-- an E2E test with the API mocked through Playwright route interception
+Phase 3, Step 6: `chore: deploy backend to render`. This adds `render.yaml` (Python 3.12, `pip install -r requirements.txt`, `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, health check `/health`) and README deploy docs. The user creates the Render service and sets `ALLOWED_ORIGINS`, then sets `NEXT_PUBLIC_API_URL` on Vercel. Smoke test: production scoring with no CORS errors.
