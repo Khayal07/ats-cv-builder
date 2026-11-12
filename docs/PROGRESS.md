@@ -5,7 +5,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 
 ## Status
 
-- **Phase 3 (rule-based scoring), Step 3** is next.
+- **Phase 3 (rule-based scoring), Step 4** is next.
 - Phase 2, Step 8 (Vercel deploy): the docs are committed, but the deploy waits on the user connecting Vercel (see Manual TODOs).
 
 ## Done
@@ -36,7 +36,8 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 | Step | Commit | Summary |
 |---|---|---|
 | 3.1 | `23f2168` | `services/text.py`: NFC + i-folding match keys, tokenizer keeping `c++`/`c#`/`.net`/`node.js`/`ci/cd`, phrase segments, EN/AZ stopword lists; 31 tests |
-| 3.2 | this commit | `services/keywords.py` + `POST /api/keywords`: 118-skill catalog with synonyms (`data/skills.json`), greedy longest alias match, repeated 1–3-word phrases with absorption, JD noise list (EN/AZ), weights and top 30; JD 1–20,000 chars, blank → 422 |
+| 3.2 | `9f82038` | `services/keywords.py` + `POST /api/keywords`: 118-skill catalog with synonyms (`data/skills.json`), greedy longest alias match, repeated 1–3-word phrases with absorption, JD noise list (EN/AZ), weights and top 30; JD 1–20,000 chars, blank → 422 |
+| 3.3 | this commit | Pydantic `Resume` models (camelCase, lenient, size-capped), `services/matching.py`, `POST /api/score` (score, matched with sections, missing by weight); 69 backend tests |
 
 ## Decisions
 
@@ -52,6 +53,7 @@ A commit cannot contain its own hash: the newest row says "this commit" and gets
 - **Matching keys fold every i variant:** the plan said "AZ-aware lowercasing (`İ→i`, `I→ı`)". Instead, keys fold `İ`, `I`, `ı` and `i` all to `i`. That needs no language detection, gives "IŞIQ" = "ışıq" = "İşıq", and keeps English "I" → "i". The cost is that `ı`/`i` minimal pairs collide, which is negligible for keyword matching. Display uses the original spelling.
 - **Ambiguous skill names:** catalog entries can set `match_name: false`, so a skill whose name is also a common English word is only found through its unambiguous aliases (Go → `golang`, Express → `express.js`, Excel → `microsoft excel`/`advanced excel`).
 - **Phrase keywords need a repeat:** a non-skill phrase needs at least 2 occurrences, and generic JD verbs/nouns are in `data/jd_noise.txt`. This keeps one-off words like "design" or "build" out of the score. At equal weight, skills rank above phrases.
+- **Matching details:** keyword variants are matched as token sequences inside phrase segments of each section. The headline counts as Summary. A light plural fold (strip a trailing `s` from words longer than 3 letters, not `ss`) is applied to both sides so "pipelines" matches "pipeline". Score = round(100 × matched weight / total weight); a JD with no keywords scores 0.
 - **Known, accepted:** `npm audit` reports 7 moderate findings in dev-only ESLint tooling. Starlette suggests `httpx2` for TestClient (a deprecation warning only); the approved `httpx` stays.
 
 ## Manual TODOs
@@ -71,4 +73,13 @@ None yet.
 
 ## Next
 
-Phase 3, Step 3: `feat: add resume match scoring`. This adds Pydantic resume models mirroring the TS `Resume`, `services/matching.py` (word-boundary token-sequence match of each keyword's variants per resume section; score = 100 × matched weight / total weight), and `POST /api/score` returning score, matched (with sections) and missing. Written test-first; the tests include `java` not matching `javascript`.
+Phase 3, Step 4: `feat: add improvement suggestions`. This adds `services/suggestions.py`, written test-first, with one test per rule:
+- missing high-weight keywords
+- keywords found only in Skills
+- empty summary
+- bullets without numbers
+- bullets over about 30 words
+- missing email
+- empty standard sections
+
+The suggestions are added to the `/api/score` response as `{type, severity, message}`.
